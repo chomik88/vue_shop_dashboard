@@ -1,11 +1,12 @@
 <template>
- <b-container>
-   <b-row>
-     <b-col>
+  <b-container>
+    <b-row>
+      <b-col>
+        <h1 class="mb-5">List of products</h1>
         <ProductList />
-     </b-col>
-   </b-row>
- </b-container>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
