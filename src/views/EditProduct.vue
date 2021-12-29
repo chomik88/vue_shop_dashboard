@@ -1,47 +1,11 @@
 <template>
-  <div class="product-edit" v-if="product">
-    <b-container>
-      <b-row>
-        <b-col md="4" class="text-start">
-          <b-img fluid :src="product.thumbnail" alt=""></b-img>
-          <b-form>
-            <b-form-group label="Thumbnail">
-              <b-form-file v-model="form.thumbnail" plain></b-form-file>
-            </b-form-group>
-          </b-form>
-        </b-col>
-        <b-col class="text-start">
-          <h1>{{ product.name }}</h1>
-          <b-form>
-            <b-form-group label="Product name" label-for="input-name">
-              <b-form-input
-                id="input-name"
-                v-model="form.name"
-                type="text"
-                placeholder="Enter product name"
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
-              label="Product description"
-              label-for="textarea-description"
-            >
-              <b-form-textarea
-                id="textarea-description"
-                v-model="form.description"
-                placeholder="Enter product description"
-              ></b-form-textarea>
-            </b-form-group>
-          </b-form>
-        </b-col>
-        <pre>
-              {{ form | JSON }}
-          </pre
-        >
-      </b-row>
-    </b-container>
+  <div v-if="product">
+    <h1>Edit product</h1>
+    <ProductAddEditForm :product="product" />
   </div>
 </template>
 <script>
+import ProductAddEditForm from "../components/ProductAddEditForm";
 import axios from "axios";
 export default {
   data() {
@@ -51,9 +15,11 @@ export default {
       form: {
         name: "",
         description: "",
-        thumbnail: "",
       },
     };
+  },
+  components: {
+    ProductAddEditForm,
   },
   methods: {
     fetchProduct() {
@@ -62,11 +28,6 @@ export default {
         .then((response) => {
           console.log(response);
           this.product = response.data;
-          this.form = {
-            name: this.product.name,
-            description: this.product.description,
-            thumbnail: this.product.thumbnail,
-          };
         });
     },
     editProduct(row) {

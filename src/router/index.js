@@ -1,7 +1,13 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
-import EditProduct from "../views/EditProduct.vue";
+import Home from "@/views/Home.vue";
+import Products from "@/views/Products.vue";
+import EditProduct from "@/views/EditProduct.vue";
+import AddProduct from "@/views/AddProduct.vue";
+import Categories from "@/views/Categories.vue";
+import AddCategory from "@/views/AddCategory.vue";
+import EditCategory from "@/views/EditCategory.vue";
+import PageNotFound from "@/views/PageNotFound.vue";
 
 Vue.use(VueRouter);
 
@@ -12,19 +18,45 @@ const routes = [
     component: Home,
   },
   {
+    path: "/categories",
+    name: "Categories",
+    component: Categories,
+  },
+  {
+    path: "/category/:id",
+    name: "EditCategory",
+    component: EditCategory,
+  },
+  {
+    path: "/new-category",
+    name: "AddCategory",
+    component: AddCategory,
+  },
+  {
     path: "/about",
     name: "About",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue"),
+      import(/* webpackChunkName: "about" */ "@/views/About.vue"),
+  },
+  {
+    path: "/products",
+    name: "Products",
+    component: Products,
   },
   {
     path: "/product/:id",
-    name: EditProduct,
+    name: "EditProduct",
     component: EditProduct,
   },
+  {
+    path: "/new-product",
+    name: "AddProduct",
+    component: AddProduct,
+  },
+  { path: "*", component: PageNotFound },
 ];
 
 const router = new VueRouter({
