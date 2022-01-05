@@ -1,13 +1,12 @@
 <template>
   <div id="app">
     <b-navbar variant="faded" type="light">
-      <b-navbar-brand href="#">
+      <b-navbar-brand href="/">
         <img
-          src="https://placekitten.com/g/30/30"
-          class="d-inline-block align-top"
-          alt="Kitten"
+          src="@/assets/logo.png"
+          alt="logo"
         />
-        Shop dashboard
+        <span> Shop dashboard</span>
       </b-navbar-brand>
     </b-navbar>
     <b-container>
@@ -17,6 +16,8 @@
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item to="/products">Products</b-nav-item>
             <b-nav-item to="/categories">Categories</b-nav-item>
+            <b-nav-item to="/customers">Customers</b-nav-item>
+            <b-nav-item to="/orders">Orders</b-nav-item>
             <b-nav-item to="/about">About</b-nav-item>
           </b-nav>
         </b-col>
@@ -27,6 +28,13 @@
     </b-container>
   </div>
 </template>
+<script>
+export default {
+  data() {
+    return {};
+  },
+};
+</script>
 
 <style lang="scss">
 #app {
@@ -48,14 +56,18 @@
 }
 
 .navbar-light {
-  background: #41b883;
+  border-bottom: 1px solid #cecece;
   padding: 12px 30px;
   margin-bottom: 24px;
   .navbar-brand {
     color: #fff;
     font-weight: 700;
+    display: flex;
+    align-items: center;
     img {
       margin-right: 16px;
+      width: 40px;
+      height: auto;
     }
   }
 }

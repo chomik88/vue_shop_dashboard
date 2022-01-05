@@ -1,7 +1,7 @@
 <template>
   <div v-if="product">
     <h1>Edit product</h1>
-    <ProductAddEditForm :product="product" />
+    <ProductAddEditForm :product="product" @refreshView="fetchProduct"/>
   </div>
 </template>
 <script>
@@ -26,7 +26,6 @@ export default {
       axios
         .get("http://localhost:3000/products/" + this.id)
         .then((response) => {
-          console.log(response);
           this.product = response.data;
         });
     },

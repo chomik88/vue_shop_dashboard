@@ -34,6 +34,7 @@
         </div>
       </template>
     </b-table>
+    <p v-else class="text-start">There are no categories to show</p>
   </div>
 </template>
 <script>

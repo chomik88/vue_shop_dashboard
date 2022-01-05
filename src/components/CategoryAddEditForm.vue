@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <b-form
-      @submit.prevent="id ? editCategory() : addCategory()"
-      class="text-start"
-    >
+  <div class="text-start">
+    <h2>{{ category.name }}</h2>
+    <b-form @submit.prevent="id ? editCategory() : addCategory()">
       <b-form-group label="Category name">
         <b-form-input
           id="input-name"
@@ -32,14 +30,19 @@ export default {
     addCategory: function () {
       axios
         .post("http://localhost:3000/categories", this.form)
-        .then((res) => console.log(res))
+        .then(this.$router.push({ path: "/categories" }))
         .catch((error) => console.error(error));
     },
     editCategory: function () {
       axios
         .patch("http://localhost:3000/categories/" + this.id, this.form)
-        .then((res) => console.log(res))
+        .then(() => {
+          this.refreshView()
+        })
         .catch((error) => console.error(error));
+    },
+    refreshView() {
+      this.$emit("refreshView");
     },
   },
 };

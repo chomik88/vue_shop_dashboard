@@ -14,7 +14,7 @@
       </b-form>
     </b-col>
     <b-col class="text-start">
-      <h1>{{ product.name }}</h1>
+      <h2>{{ product.name }}</h2>
       <b-form @submit.prevent="id ? editProduct() : addProduct()">
         <b-form-group label="Product name" label-for="input-name">
           <b-form-input
@@ -35,6 +35,16 @@
             placeholder="Enter product description"
           ></b-form-textarea>
         </b-form-group>
+        <b-form-group label="Product categories">
+          <b-form-checkbox-group v-model="form.category">
+            <b-form-checkbox
+              v-for="category in categories"
+              :key="category._id"
+              :value="category._id"
+              >{{ category.name }}</b-form-checkbox
+            >
+          </b-form-checkbox-group>
+        </b-form-group>
         <b-button type="submit" variant="primary" class="mt-4">Submit</b-button>
       </b-form>
     </b-col>
@@ -50,10 +60,12 @@ export default {
   data() {
     return {
       id: this.$route.params.id,
+      categories: [],
       form: {
         name: this.product.name,
         description: this.product.description,
         thumbnail: this.product.thumbnail,
+        category: this.product.category,
       },
     };
   },
@@ -68,9 +80,31 @@ export default {
     editProduct: function () {
       axios
         .patch("http://localhost:3000/products/" + this.id, this.form)
-        .then((res) => console.log(res))
+        .then(() => {
+          this.refreshView();
+        })
         .catch((error) => console.error(error));
     },
+    fetchCategories: function () {
+      axios.get("http://localhost:3000/categories").then((response) => {
+        this.categories = response.data;
+      });
+    },
+    refreshView() {
+      this.$emit("refreshView");
+    },
+    
+  },
+  mounted() {
+    this.fetchCategories();
+    console.log(this.$store);
   },
 };
 </script>
+<style lang="scss">
+.custom-checkbox {
+  input {
+    margin-right: 8px;
+  }
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
   <div v-if="category">
     <h1>Edit category</h1>
-    <CategoryAddEditForm :category="category" />
+    <CategoryAddEditForm :category="category" @refreshView="fetchCategory"/>
   </div>
 </template>
 <script>

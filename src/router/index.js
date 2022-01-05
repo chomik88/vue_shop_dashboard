@@ -7,6 +7,10 @@ import AddProduct from "@/views/AddProduct.vue";
 import Categories from "@/views/Categories.vue";
 import AddCategory from "@/views/AddCategory.vue";
 import EditCategory from "@/views/EditCategory.vue";
+import Customers from "@/views/Customers.vue";
+import CustomerDetails from "@/views/CustomerDetails.vue";
+import Orders from "@/views/Orders.vue";
+import OrderDetails from "@/views/OrderDetails.vue";
 import PageNotFound from "@/views/PageNotFound.vue";
 
 Vue.use(VueRouter);
@@ -55,6 +59,26 @@ const routes = [
     path: "/new-product",
     name: "AddProduct",
     component: AddProduct,
+  },
+  {
+    path: "/customers",
+    name: "Customers",
+    component: Customers,
+  },
+  {
+    path: "/customer/:id",
+    name: "CustomerDetails",
+    component: CustomerDetails,
+  },
+  {
+    path: "/orders",
+    name: "Orders",
+    component: Orders,
+  },
+  {
+    path: "/order/:id",
+    name: "OrderDetails",
+    component: OrderDetails,
   },
   { path: "*", component: PageNotFound },
 ];
