@@ -5,7 +5,7 @@
   </div>
 </template>
 <script>
-import CategoryList from "@/components/CategoryList";
+import CategoryList from "@/components/Category/CategoryList";
 export default {
   components: {
     CategoryList,

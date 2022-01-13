@@ -2,10 +2,7 @@
   <div id="app">
     <b-navbar variant="faded" type="light">
       <b-navbar-brand href="/">
-        <img
-          src="@/assets/logo.png"
-          alt="logo"
-        />
+        <img src="@/assets/logo.png" alt="logo" />
         <span> Shop dashboard</span>
       </b-navbar-brand>
     </b-navbar>
@@ -15,6 +12,7 @@
           <b-nav vertical id="nav" class="text-start">
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item to="/products">Products</b-nav-item>
+            <b-nav-item to="/attributes">Attributes</b-nav-item>
             <b-nav-item to="/categories">Categories</b-nav-item>
             <b-nav-item to="/customers">Customers</b-nav-item>
             <b-nav-item to="/orders">Orders</b-nav-item>

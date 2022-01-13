@@ -15,15 +15,20 @@
 </template>
 <script>
 export default {
-  methods: {
-    hide() {
-      this.$emit("hide");
-    },
-    triggerDelete(item) {
-      this.$emit("triggerDelete", item);
-      this.hide();
-    },
-  },
   props: ["item", "visible"],
+  setup(props, context) {
+    const hide = () => {
+      context.emit("hide");
+    };
+    const triggerDelete = (item) => {
+      context.emit("triggerDelete", item);
+      hide();
+    };
+
+    return {
+      triggerDelete,
+      hide
+    };
+  },
 };
 </script>

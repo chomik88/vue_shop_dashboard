@@ -7,7 +7,7 @@
 
 <script>
 // @ is an alias to /src
-import ProductList from "@/components/ProductList";
+import ProductList from "@/components/Product/ProductList";
 
 export default {
   name: "Home",

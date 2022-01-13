@@ -30,29 +30,34 @@
 </template>
 <script>
 import axios from "axios";
+import { ref, toRefs } from "@vue/composition-api";
 export default {
-  data() {
-    return {
-      orders: [],
-      tableFields: ["customerId", "orderDate", "actions"],
-    };
-  },
   props: ["filter"],
-  methods: {
-    fetchOrders() {
-      const url = this.filter
-        ? "http://localhost:3000/orders/c/" + this.filter
+  setup(props, context) {
+    const router = context.root.$router;
+    const orders = ref([]);
+    const tableFields = ["customerId", "orderDate", "actions"];
+    const { filter } = toRefs(props);
+
+    const fetchOrders = () => {
+      const url = filter.value
+        ? "http://localhost:3000/orders/c/" + filter.value
         : "http://localhost:3000/orders/";
       axios.get(url).then((response) => {
-        this.orders = response.data;
+        orders.value = response.data;
       });
-    },
-    showOrderDetails(id) {
-      this.$router.push({ path: `../order/${id}` });
-    },
-  },
-  created() {
-    this.fetchOrders();
+    };
+    const showOrderDetails = (id) => {
+      router.push({ path: `../order/${id}` });
+    };
+
+    fetchOrders();
+
+    return {
+      orders,
+      tableFields,
+      showOrderDetails,
+    };
   },
 };
 </script>

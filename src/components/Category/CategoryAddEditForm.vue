@@ -16,34 +16,40 @@
 </template>
 <script>
 import axios from "axios";
+import { reactive } from "@vue/composition-api";
 export default {
-  data() {
-    return {
-      id: this.$route.params.id,
-      form: {
-        name: this.category.name,
-      },
-    };
-  },
   props: ["category"],
-  methods: {
-    addCategory: function () {
+  setup(props, context) {
+    const router = context.root.$router;
+    const route = context.root.$route;
+    const id = route.params.id;
+    const form = reactive({
+      name: props.category.name,
+    });
+
+    const addCategory = () => {
       axios
-        .post("http://localhost:3000/categories", this.form)
-        .then(this.$router.push({ path: "/categories" }))
+        .post("http://localhost:3000/categories", form)
+        .then(router.push({ path: "/categories" }))
         .catch((error) => console.error(error));
-    },
-    editCategory: function () {
+    };
+    const editCategory = () => {
       axios
-        .patch("http://localhost:3000/categories/" + this.id, this.form)
+        .patch("http://localhost:3000/categories/" + id, form)
         .then(() => {
-          this.refreshView()
+          refreshView();
         })
         .catch((error) => console.error(error));
-    },
-    refreshView() {
-      this.$emit("refreshView");
-    },
+    };
+    const refreshView = () => {
+      context.emit("refreshView");
+    };
+    return {
+      form,
+      id,
+      addCategory,
+      editCategory,
+    };
   },
 };
 </script>

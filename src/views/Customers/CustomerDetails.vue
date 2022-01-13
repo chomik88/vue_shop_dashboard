@@ -1,6 +1,6 @@
 <template>
   <div v-if="customer">
-    <h1>Customer details</h1>
+    <h1 class="mb-5">Customer details</h1>
     <b-tabs class="text-start" content-class="mt-3">
       <b-tab title="Customer details">
         <b-row>
@@ -33,7 +33,7 @@
         </b-row>
       </b-tab>
       <b-tab title="Orders">
-        <OrderList :filter="customer._id"/>
+        <OrderList :filter="customer._id" />
       </b-tab>
     </b-tabs>
   </div>
@@ -42,27 +42,24 @@
 <script>
 import axios from "axios";
 import OrderList from "@/components/OrderList";
+import { ref } from "@vue/composition-api";
 export default {
-  data() {
-    return {
-      id: this.$route.params.id,
-      customer: null,
-    };
-  },
   components: {
     OrderList,
   },
-  methods: {
-    fetchCustomer() {
-      axios
-        .get("http://localhost:3000/customers/" + this.id)
-        .then((response) => {
-          this.customer = response.data;
-        });
-    },
-  },
-  created() {
-    this.fetchCustomer();
+  setup(props, context) {
+    const route = context.root.$route;
+    const id = route.params.id;
+    const customer = ref(null);
+    const fetchCustomer = () => {
+      axios.get("http://localhost:3000/customers/" + id).then((response) => {
+        customer.value = response.data;
+      });
+    };
+    fetchCustomer();
+    return {
+      customer,
+    };
   },
 };
 </script>
