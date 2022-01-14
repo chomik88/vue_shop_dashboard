@@ -29,7 +29,7 @@ export default {
 
     const addCategory = () => {
       axios
-        .post("http://localhost:3000/categories", form)
+        .post("http://localhost:3000/categories/", form)
         .then(router.push({ path: "/categories" }))
         .catch((error) => console.error(error));
     };

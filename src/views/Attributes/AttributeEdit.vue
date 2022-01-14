@@ -34,10 +34,27 @@ export default {
         })
         .catch((error) => console.error(error))
         .finally(() => {
-          isLoading.value = false;
-        })
-        ;
+          fetchAttributeValues();
+        });
     };
+
+    const fetchAttributeValues = () => {
+      axios
+        .get("http://localhost:3000/attribute-values/a/" + id)
+        .then((response) => {
+          console.log(response);
+          const values = response.data.map((item) => {
+            return {
+              id: item._id,
+              value: item.value,
+            };
+          });
+          attribute.value.values = values;
+        })
+        .catch((error) => console.error(error.message))
+        .finally(() => (isLoading.value = false));
+    };
+
     const goBack = () => {
       router.push("/attributes");
     };

@@ -1,43 +1,46 @@
 <template>
   <div>
     <b-button
-      class="d-flex justify-content-start"
+      class="d-flex justify-content-start mb-4"
       variant="primary"
       @click="goToAddProduct"
       >Add product</b-button
     >
-    <b-table
-      striped
-      bordered
-      borderless
-      small
-      hover
-      :items="products"
-      :fields="tableFields"
-      v-if="products.length > 0"
-      class="mt-4"
-    >
-      <template #cell(thumbnail)="data">
-        <b-img :src="data.value"></b-img>
-      </template>
-      <template #cell(actions)="row">
-        <div class="buttons-wrapper">
-          <b-button
-            variant="primary"
-            router-tag="button"
-            @click="editProduct(row.item._id)"
-            >Edit</b-button
-          >
-          <b-button
-            variant="danger"
-            router-tag="button"
-            @click="showModal(row.item)"
-            >Remove</b-button
-          >
-        </div>
-      </template>
-    </b-table>
-    <p v-else class="text-start">There are no products to show</p>
+    <div v-if="!isLoading">
+      <b-table
+        striped
+        bordered
+        borderless
+        small
+        hover
+        :items="products"
+        :fields="tableFields"
+        v-if="products.length > 0"
+      >
+        <template #cell(thumbnail)="data">
+          <b-img :src="data.value"></b-img>
+        </template>
+        <template #cell(actions)="row">
+          <div class="buttons-wrapper">
+            <b-button
+              variant="primary"
+              router-tag="button"
+              @click="editProduct(row.item._id)"
+              >Edit</b-button
+            >
+            <b-button
+              variant="danger"
+              router-tag="button"
+              @click="showModal(row.item)"
+              >Remove</b-button
+            >
+          </div>
+        </template>
+      </b-table>
+      <p v-else class="text-start">There are no products to show</p>
+    </div>
+    <p v-else class="text-start">Loading...</p>
+
     <Modal
       :item="currentItem"
       :visible="modalVisible"
@@ -60,11 +63,19 @@ export default {
     const products = ref([]);
     const currentItem = ref(null);
     const modalVisible = ref(false);
+    const isLoading = ref(false);
 
     const fetchProducts = () => {
-      axios.get("http://localhost:3000/products").then((response) => {
-        products.value = response.data;
-      });
+      isLoading.value = true;
+      axios
+        .get("http://localhost:3000/products")
+        .then((response) => {
+          products.value = response.data;
+        })
+        .catch((error) => console.error(error.message))
+        .finally(() => {
+          isLoading.value = false;
+        });
     };
     const editProduct = (id) => {
       router.push({ path: `product/${id}` });
@@ -179,6 +190,7 @@ export default {
     return {
       tableFields,
       products,
+      isLoading,
       currentItem,
       modalVisible,
       editProduct,

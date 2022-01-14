@@ -6,34 +6,37 @@
       @click="goToAddCategory"
       >Add category</b-button
     >
-    <b-table
-      striped
-      bordered
-      borderless
-      small
-      hover
-      :items="categories"
-      :fields="tableFields"
-      v-if="categories.length > 0"
-    >
-      <template #cell(actions)="row">
-        <div class="buttons-wrapper">
-          <b-button
-            variant="primary"
-            router-tag="button"
-            @click="editCategory(row.item._id)"
-            >Edit</b-button
-          >
-          <b-button
-            variant="danger"
-            router-tag="button"
-            @click="showModal(row.item)"
-            >Remove</b-button
-          >
-        </div>
-      </template>
-    </b-table>
-    <p v-else class="text-start">There are no categories to show</p>
+    <div v-if="!isLoading">
+      <b-table
+        striped
+        bordered
+        borderless
+        small
+        hover
+        :items="categories"
+        :fields="tableFields"
+        v-if="categories.length > 0"
+      >
+        <template #cell(actions)="row">
+          <div class="buttons-wrapper">
+            <b-button
+              variant="primary"
+              router-tag="button"
+              @click="editCategory(row.item._id)"
+              >Edit</b-button
+            >
+            <b-button
+              variant="danger"
+              router-tag="button"
+              @click="showModal(row.item)"
+              >Remove</b-button
+            >
+          </div>
+        </template>
+      </b-table>
+      <p v-else class="text-start">There are no categories to show</p>
+    </div>
+    <p v-else class="text-start">Loading...</p>
     <Modal
       :item="currentItem"
       :visible="modalVisible"
@@ -53,10 +56,18 @@ export default {
     const categories = ref([]);
     const currentItem = ref(null);
     const modalVisible = ref(false);
+    const isLoading = ref(false);
     const fetchCategories = () => {
-      axios.get("http://localhost:3000/categories").then((response) => {
-        categories.value = response.data;
-      });
+      isLoading.value = true;
+      axios
+        .get("http://localhost:3000/categories")
+        .then((response) => {
+          categories.value = response.data;
+        })
+        .catch((error) => console.error(error.message))
+        .finally(() => {
+          isLoading.value = false;
+        });
     };
     const editCategory = (id) => {
       router.push({ path: `category/${id}` });
@@ -83,6 +94,7 @@ export default {
       categories,
       currentItem,
       modalVisible,
+      isLoading,
       editCategory,
       deleteCategory,
       goToAddCategory,
