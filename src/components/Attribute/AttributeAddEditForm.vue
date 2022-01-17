@@ -34,12 +34,12 @@
             <div class="tags-wrapper">
               <b-form-tag
                 v-for="tag in tags"
-                :key="JSON.parse(tag).id"
-                :title="JSON.parse(tag).value"
+                :key="tag"
+                :title="tag"
                 @remove="removeTag(tag)"
                 :variant="tagVariant"
               >
-                {{ JSON.parse(tag).value }}
+                {{ tag }}
               </b-form-tag>
             </div>
           </template>
@@ -51,39 +51,96 @@
 </template>
 <script>
 import axios from "axios";
-import { reactive, watch } from "@vue/composition-api";
+import { reactive, watch, ref } from "@vue/composition-api";
 export default {
   props: ["attribute"],
   setup(props, context) {
     const route = context.root.$route;
     const router = context.root.$router;
     const id = route.params.id;
-    console.log(props.attribute);
+    const attributeValues = props.attribute.values;
+    const newAttributeValues = ref([]);
+    const deletedAttributeValues = ref([]);
     const form = reactive({
       name: props.attribute.name,
-      values: props.attribute.values,
+      values: [],
     });
-
-    console.log(form);
 
     const addAttribute = () => {
       axios
-        .post("http://localhost:3000/attributes/", form)
-        .then(router.push({ path: "/attributes" }))
+        .post("http://localhost:3000/attributes/", {
+          name: form.name,
+        })
+        .then((response) => {
+          addAttributeValues(response.data._id, form.values);
+        })
         .catch((error) => console.error(error));
+    };
+
+    const addAttributeValues = (id, values) => {
+      values.map((value) => {
+        if (deletedAttributeValues.value.indexOf(value) > -1) {
+          values.splice(value, 1);
+        }
+      });
+      values.map((value) => {
+        axios
+          .post("http://localhost:3000/attribute-values/", {
+            attributeId: id,
+            value: value,
+          })
+          .catch((error) => console.error(error));
+      });
     };
 
     const editAttribute = () => {
       axios
         .patch("http://localhost:3000/attributes/" + id, form)
-        .then((response) => console.log(response))
-        .catch((error) => console.error(error));
+        .then((response) => {
+          addAttributeValues(response.data._id, newAttributeValues.value);
+        })
+        .then(() => removeAttributeValues())
+        .catch((error) => console.error(error))
+        .finally(() => router.push({ path: "/attributes" }));
     };
 
-    watch(() => [...form.values], (newValue, oldValue) => {
-      console.log(newValue, oldValue)
-      // const new
-    })
+    const setTagsValues = () => {
+      attributeValues.map((item) => form.values.push(item.value));
+    };
+
+    const removeAttributeValues = () => {
+      const valuesToRemove = attributeValues.filter((item) => {
+        if (deletedAttributeValues.value.indexOf(item.value) > -1) {
+          return item;
+        }
+      });
+      valuesToRemove.map((value) => {
+        axios
+          .delete("http://localhost:3000/attribute-values/" + value.id)
+          .then((response) => console.log(response))
+          .catch((error) => console.error(error));
+      });
+    };
+
+    setTagsValues();
+
+    watch(
+      () => [...form.values],
+      (newValue, oldValue) => {
+        const newAttributeValue = newValue.filter((item) => {
+          if (oldValue.indexOf(item) === -1) {
+            return item;
+          }
+        });
+        const deletedValues = oldValue.filter((item) => {
+          if (newValue.indexOf(item) === -1) {
+            return item;
+          }
+        });
+        newAttributeValues.value.push(...newAttributeValue);
+        deletedAttributeValues.value.push(...deletedValues);
+      }
+    );
 
     return {
       form,

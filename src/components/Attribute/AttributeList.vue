@@ -72,21 +72,24 @@ export default {
         .then((response) => {
           attributes.value = response.data;
         })
-        .catch((error) => console.error(error.message))
-        .finally(() => {
-          fetchAttributeValues();
-        });
+        .then(() => fetchAttributeValues())
+        .catch((error) => console.error(error.message));
     };
     const fetchAttributeValues = () => {
+      const promises = [];
       attributes.value.map((item) => {
-        axios
-          .get("http://localhost:3000/attribute-values/a/" + item._id)
-          .then((response) => {
-            const values = response.data.map((item) => item.value);
-            item.values = values;
-          })
-          .catch((error) => console.error(error.message))
-          .finally(() => (isLoading.value = false));
+        promises.push(
+          axios
+            .get("http://localhost:3000/attribute-values/a/" + item._id)
+            .then((response) => {
+              const values = response.data.map((item) => item.value);
+              item.values = values;
+            })
+            .catch((error) => console.error(error.message))
+        );
+      });
+      Promise.all(promises).then(() => {
+        isLoading.value = false;
       });
     };
     const goToAddAttribute = () => {
