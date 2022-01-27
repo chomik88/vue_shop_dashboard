@@ -52,8 +52,8 @@
       <b-row v-if="productImageThumbnails.length > 0">
         <b-col
           md="4"
-          v-for="thumbnail in productImageThumbnails"
-          :key="thumbnail.name"
+          v-for="(thumbnail, index) in productImageThumbnails"
+          :key="index"
         >
           <div class="img-item rounded">
             <b-img
@@ -85,6 +85,7 @@
     </b-col>
     <pre>
               {{ form }}
+              {{ imagesToUpload }}
           </pre
     >
   </b-row>
@@ -109,10 +110,10 @@ export default {
       description: props.product.description,
       mainImage: props.product.mainImage,
       category: props.product.category,
+      servedImages: props.product.images,
     });
     const mainImage = ref(null);
     const imagesToUpload = ref([]);
-    const imagesToDelete = ref([]);
     const productImageThumbnails = ref([]);
     const addProduct = () => {
       defineFormData();
@@ -148,7 +149,7 @@ export default {
       formData.append("description", form.description);
       formData.append("category", form.category);
       formData.append("mainImage", mainImage.value);
-      formData.append("imagesToDelete", imagesToDelete.value);
+      formData.append("servedImages", JSON.stringify(form.servedImages));
       for (let i = 0; i < imagesToUpload.value.length; i++) {
         formData.append(
           "images",
@@ -160,8 +161,10 @@ export default {
     };
 
     const onImagesSelect = (event) => {
-      imagesToUpload.value = Array.from(event.target.files);
+      imagesToUpload.value = [...Array.from(event.target.files)];
+      console.log(imagesToUpload.value);
       imagesToUpload.value.forEach((file) => {
+        console.log(file);
         const fileReader = new FileReader();
         fileReader.addEventListener("load", function (e) {
           productImageThumbnails.value.push({
@@ -191,7 +194,10 @@ export default {
         updateImageThumbnails(image);
       } else {
         updateImageThumbnails(image);
-        imagesToDelete.value.push(image.name);
+        form.servedImages = form.servedImages.filter((item) => {
+          return item.fileName !== image.name;
+        });
+        console.log(form.servedImages);
       }
     };
 
@@ -220,6 +226,7 @@ export default {
       goBack,
       removeImage,
       onImagesSelect,
+      imagesToUpload,
     };
   },
 };
