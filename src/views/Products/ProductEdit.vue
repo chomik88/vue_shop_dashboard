@@ -7,17 +7,19 @@
     </b-row>
     <div v-if="product">
       <h1 class="mb-5">Edit product</h1>
-      <b-form v-if="!isLoading">
-        <b-tabs class="text-start">
+      <b-form v-if="!isLoading" class="text-start">
+        <b-button @click="send()">SEND</b-button>
+        <b-tabs>
           <b-tab title="Product main features">
             <ProductAddEditForm
               :product="product"
               @refreshView="fetchProduct"
               class="mt-4"
+              ref="editForm"
             />
           </b-tab>
           <b-tab title="Product attributes">
-            <ProductAttributesEditForm />
+            <ProductAttributesEditForm ref="editAttributes"/>
           </b-tab>
         </b-tabs>
       </b-form>
@@ -45,6 +47,8 @@ export default {
     const id = route.params.id;
     const product = ref(null);
     const isLoading = ref(false);
+    const editForm = ref(null);
+    const editAttributes = ref(null);
 
     const fetchProduct = () => {
       isLoading.value = true;
@@ -66,12 +70,20 @@ export default {
       router.push("/products");
     };
 
+    const send = () => {
+      console.log(editForm.value.form);
+      console.log(editAttributes.value.selectedAttributes);
+    };
+
     fetchProduct();
     return {
       product,
       isLoading,
       fetchProduct,
       goBack,
+      editForm,
+      editAttributes,
+      send,
     };
   },
 };
