@@ -98,31 +98,6 @@ export default {
       context.emit("refreshView");
     };
 
-    const validateForm = (id) => {
-      context.root.$validator.validateAll().then((result) => {
-        if (result) {
-          console.log(result);
-          alert("Form Submitted!");
-          return;
-        } else {
-          id ? editProduct() : addProduct();
-        }
-
-        alert("Correct them errors!");
-      });
-    };
-
-    // const  validateState = (ref) => {
-    //   console.log(context)
-    //   if (
-    //     context.veeFields[ref] &&
-    //     (context.veeFields[ref].dirty || context.veeFields[ref].validated)
-    //   ) {
-    //     return !context.veeErrors.has(ref);
-    //   }
-    //   return null;
-    // }
-
     onMounted(fetchCategories);
 
     return {
@@ -132,7 +107,6 @@ export default {
       addProduct,
       editProduct,
       refreshView,
-      validateForm,
     };
   },
 };

@@ -10,19 +10,26 @@
           placeholder="Enter attribute name"
         ></b-form-input>
       </b-form-group>
-      <TagsSelect :tagValues="form.values" componentType="add"/>
+      <TagsSelect
+        :tagValues="form.values"
+        @updateTags="updateFormTags"
+        componentType="add"
+      />
       <b-button type="submit" variant="primary" class="mt-4">Submit</b-button>
     </b-form>
+    <pre>
+      {{ form }}
+    </pre>
   </div>
 </template>
 <script>
 import axios from "axios";
 import { reactive, ref } from "@vue/composition-api";
-import TagsSelect from '@/components/Shared/TagsSelect';
+import TagsSelect from "@/components/Shared/TagsSelect";
 export default {
   props: ["attribute"],
   components: {
-    TagsSelect
+    TagsSelect,
   },
   setup(props, context) {
     const route = context.root.$route;
@@ -72,11 +79,16 @@ export default {
         .finally(() => router.push({ path: "/attributes" }));
     };
 
+    const updateFormTags = (e) => {
+      form.values = e;
+    };
+
     return {
       form,
       id,
       addAttribute,
       editAttribute,
+      updateFormTags,
     };
   },
 };

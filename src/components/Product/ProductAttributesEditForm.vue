@@ -6,7 +6,6 @@
         @change="selectAttribute($event)"
       >
         <template #first>
-          <!-- This is required to prevent bugs with Safari -->
           <option disabled :value="null">Choose attribute</option>
         </template>
         <template>

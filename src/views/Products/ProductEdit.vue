@@ -7,18 +7,20 @@
     </b-row>
     <div v-if="product">
       <h1 class="mb-5">Edit product</h1>
-      <b-tabs v-if="!isLoading" class="text-start">
-        <b-tab title="Product main features">
-          <ProductAddEditForm
-            :product="product"
-            @refreshView="fetchProduct"
-            class="mt-4"
-          />
-        </b-tab>
-        <b-tab title="Product attributes">
-          <ProductAttributesEditForm />
-        </b-tab>
-      </b-tabs>
+      <b-form v-if="!isLoading">
+        <b-tabs class="text-start">
+          <b-tab title="Product main features">
+            <ProductAddEditForm
+              :product="product"
+              @refreshView="fetchProduct"
+              class="mt-4"
+            />
+          </b-tab>
+          <b-tab title="Product attributes">
+            <ProductAttributesEditForm />
+          </b-tab>
+        </b-tabs>
+      </b-form>
       <p v-else>Loading...</p>
     </div>
     <div v-else>

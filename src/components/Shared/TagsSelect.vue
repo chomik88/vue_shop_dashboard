@@ -5,7 +5,7 @@
       class="mt-3"
       v-if="componentType === 'add'"
     >
-      <b-form-tags v-model="tagValues" no-outer-focus>
+      <b-form-tags v-model="value" no-outer-focus>
         <template
           v-slot="{
             tags,
@@ -41,7 +41,7 @@
     </b-form-group>
     <b-form-group label="Attribute values" class="mt-3" v-else>
       {{ tagValues }}
-      <b-form-tags v-model="value" no-outer-focus>
+      <b-form-tags v-model="usedValues" no-outer-focus>
         <template
           v-slot="{
             tags,
@@ -59,8 +59,7 @@
               :disabled="availableOptions.length === 0"
               :options="availableOptions"
             >
-             <template #first>
-                <!-- This is required to prevent bugs with Safari -->
+              <template #first>
                 <option disabled value="">Choose a tag...</option>
               </template>
             </b-form-select>
@@ -80,23 +79,31 @@
         </template>
       </b-form-tags>
     </b-form-group>
+    {{ value }}
   </div>
 </template>
 <script>
-import { ref, computed } from "@vue/composition-api";
+import { ref, computed, watch } from "@vue/composition-api";
 export default {
   props: ["tagValues", "componentType"],
-  setup(props) {
+  setup(props, context) {
     const value = ref([]);
-
+    const usedValues = ref([]);
+    props.tagValues ? (value.value = props.tagValues) : (value.value = []);
     const availableOptions = computed(() => {
       const result = props.tagValues.filter((tagValue) => {
-        return value.value.indexOf(tagValue) === -1;
+        return usedValues.value.indexOf(tagValue) === -1;
       });
       return result;
     });
+
+    watch(value, (tags) => {
+      context.emit("updateTags", tags);
+    });
+
     return {
       value,
+      usedValues,
       availableOptions,
     };
   },
