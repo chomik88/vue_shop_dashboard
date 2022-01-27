@@ -17,10 +17,10 @@
         :fields="tableFields"
         v-if="attributes.length > 0"
       >
-        <template #cell(values)="row">
-          <template v-for="(value, index) in row.item.values">
+        <template #cell(attributeValues)="row">
+          <template v-for="(value, index) in row.item.attributeValues">
             {{ value
-            }}<span v-if="index + 1 < row.item.values.length" :key="value"
+            }}<span v-if="index + 1 < row.item.attributeValues.length" :key="value"
               >,</span
             >
           </template>
@@ -61,7 +61,7 @@ export default {
   setup(props, context) {
     const router = context.root.$router;
     const attributes = ref([]);
-    const tableFields = ["name", "values", "actions"];
+    const tableFields = ["name", "attributeValues", "actions"];
     const currentItem = ref(null);
     const modalVisible = ref(false);
     const isLoading = ref(false);
@@ -70,27 +70,11 @@ export default {
       axios
         .get("http://localhost:3000/attributes")
         .then((response) => {
-          attributes.value = response.data;
+          console.log(response.data)
+          return attributes.value = response.data;
         })
-        .then(() => fetchAttributeValues())
-        .catch((error) => console.error(error.message));
-    };
-    const fetchAttributeValues = () => {
-      const promises = [];
-      attributes.value.map((item) => {
-        promises.push(
-          axios
-            .get("http://localhost:3000/attribute-values/a/" + item._id)
-            .then((response) => {
-              const values = response.data.map((item) => item.value);
-              item.values = values;
-            })
-            .catch((error) => console.error(error.message))
-        );
-      });
-      Promise.all(promises).then(() => {
-        isLoading.value = false;
-      });
+        .catch((error) => console.error(error.message))
+        .finally(() => (isLoading.value = false));
     };
     const goToAddAttribute = () => {
       router.push({ path: "new-attribute" });

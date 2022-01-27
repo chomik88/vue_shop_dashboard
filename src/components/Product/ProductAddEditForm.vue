@@ -1,8 +1,5 @@
 <template>
   <b-row>
-    <b-col md="12" class="text-start mb-4">
-      <b-button @click="goBack()">Go back</b-button>
-    </b-col>
     <b-col md="4" class="text-start">
       <b-img
         fluid
@@ -23,7 +20,7 @@
     </b-col>
     <b-col class="text-start">
       <h2>{{ product.name }}</h2>
-      <b-form @submit.prevent="validateForm(id)">
+      <b-form @submit.prevent="id ? editProduct() : addProduct()">
         <b-form-group label="Product name" label-for="input-name">
           <b-form-input
             id="input-name"
@@ -100,15 +97,11 @@ export default {
     const refreshView = () => {
       context.emit("refreshView");
     };
-    const goBack = () => {
-      router.push("/products");
-    };
 
     const validateForm = (id) => {
       context.root.$validator.validateAll().then((result) => {
         if (result) {
           console.log(result);
-          // eslint-disable-next-line
           alert("Form Submitted!");
           return;
         } else {
@@ -139,7 +132,6 @@ export default {
       addProduct,
       editProduct,
       refreshView,
-      goBack,
       validateForm,
     };
   },

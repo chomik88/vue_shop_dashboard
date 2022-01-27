@@ -10,60 +10,29 @@
           placeholder="Enter attribute name"
         ></b-form-input>
       </b-form-group>
-      <b-form-group label="Attribute values" class="mt-3">
-        <b-form-tags v-model="form.values" no-outer-focus>
-          <template
-            v-slot="{
-              tags,
-              inputAttrs,
-              inputHandlers,
-              addTag,
-              removeTag,
-              tagVariant,
-            }"
-          >
-            <b-input-group>
-              <b-form-input
-                v-bind="inputAttrs"
-                v-on="inputHandlers"
-              ></b-form-input>
-              <b-input-group-append>
-                <b-button variant="primary" @click="addTag">Add</b-button>
-              </b-input-group-append>
-            </b-input-group>
-            <div class="tags-wrapper">
-              <b-form-tag
-                v-for="tag in tags"
-                :key="tag"
-                :title="tag"
-                @remove="removeTag(tag)"
-                :variant="tagVariant"
-              >
-                {{ tag }}
-              </b-form-tag>
-            </div>
-          </template>
-        </b-form-tags>
-      </b-form-group>
+      <TagsSelect :tagValues="form.values" componentType="add"/>
       <b-button type="submit" variant="primary" class="mt-4">Submit</b-button>
     </b-form>
   </div>
 </template>
 <script>
 import axios from "axios";
-import { reactive, watch, ref } from "@vue/composition-api";
+import { reactive, ref } from "@vue/composition-api";
+import TagsSelect from '@/components/Shared/TagsSelect';
 export default {
   props: ["attribute"],
+  components: {
+    TagsSelect
+  },
   setup(props, context) {
     const route = context.root.$route;
     const router = context.root.$router;
     const id = route.params.id;
-    const attributeValues = props.attribute.values;
     const newAttributeValues = ref([]);
     const deletedAttributeValues = ref([]);
     const form = reactive({
       name: props.attribute.name,
-      values: [],
+      values: props.attribute.values,
     });
 
     const addAttribute = () => {
@@ -99,48 +68,9 @@ export default {
         .then((response) => {
           addAttributeValues(response.data._id, newAttributeValues.value);
         })
-        .then(() => removeAttributeValues())
         .catch((error) => console.error(error))
         .finally(() => router.push({ path: "/attributes" }));
     };
-
-    const setTagsValues = () => {
-      attributeValues.map((item) => form.values.push(item.value));
-    };
-
-    const removeAttributeValues = () => {
-      const valuesToRemove = attributeValues.filter((item) => {
-        if (deletedAttributeValues.value.indexOf(item.value) > -1) {
-          return item;
-        }
-      });
-      valuesToRemove.map((value) => {
-        axios
-          .delete("http://localhost:3000/attribute-values/" + value.id)
-          .then((response) => console.log(response))
-          .catch((error) => console.error(error));
-      });
-    };
-
-    setTagsValues();
-
-    watch(
-      () => [...form.values],
-      (newValue, oldValue) => {
-        const newAttributeValue = newValue.filter((item) => {
-          if (oldValue.indexOf(item) === -1) {
-            return item;
-          }
-        });
-        const deletedValues = oldValue.filter((item) => {
-          if (newValue.indexOf(item) === -1) {
-            return item;
-          }
-        });
-        newAttributeValues.value.push(...newAttributeValue);
-        deletedAttributeValues.value.push(...deletedValues);
-      }
-    );
 
     return {
       form,
