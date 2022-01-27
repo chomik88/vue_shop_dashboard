@@ -92,6 +92,11 @@
 <script>
 import axios from "axios";
 import { ref, reactive, onMounted } from "@vue/composition-api";
+
+const isBase64 = (image) => {
+  return image.src.indexOf("base64") > -1;
+};
+
 export default {
   props: ["product"],
   setup(props, context) {
@@ -106,21 +111,20 @@ export default {
       category: props.product.category,
     });
     const mainImage = ref(null);
-    const formData = new FormData();
     const imagesToUpload = ref([]);
     const imagesToDelete = ref([]);
     const productImageThumbnails = ref([]);
     const addProduct = () => {
       defineFormData();
       axios
-        .post("http://localhost:3000/products", formData)
+        .post("http://localhost:3000/products", defineFormData())
         .then(() => router.push({ path: "/products" }))
         .catch((error) => console.error(error));
     };
     const editProduct = () => {
       defineFormData();
       axios
-        .patch("http://localhost:3000/products/" + id, formData)
+        .patch("http://localhost:3000/products/" + id, defineFormData())
         .then(() => {
           refreshView();
         })
@@ -128,7 +132,6 @@ export default {
     };
     const fetchCategories = () => {
       axios.get("http://localhost:3000/categories").then((response) => {
-        console.log(response.data);
         categories.value = response.data;
       });
     };
@@ -140,19 +143,20 @@ export default {
     };
 
     const defineFormData = () => {
+      const formData = new FormData();
       formData.append("name", form.name);
       formData.append("description", form.description);
       formData.append("category", form.category);
       formData.append("mainImage", mainImage.value);
       formData.append("imagesToDelete", imagesToDelete.value);
       for (let i = 0; i < imagesToUpload.value.length; i++) {
-        console.log(imagesToUpload.value[i]);
         formData.append(
           "images",
           imagesToUpload.value[i],
           imagesToUpload.value[i].name
         );
       }
+      return formData;
     };
 
     const onImagesSelect = (event) => {
@@ -170,34 +174,8 @@ export default {
       });
     };
 
-    // const validateForm = (id) => {
-    //   context.root.$validator.validateAll().then((result) => {
-    //     if (result) {
-    //       console.log(result);
-    //       // alert("Form Submitted!");
-    //       return;
-    //     } else {
-    //       id ? editProduct() : addProduct();
-    //     }
-
-    //     alert("Correct them errors!");
-    //   });
-    // };
-
-    // const  validateState = (ref) => {
-    //   console.log(context)
-    //   if (
-    //     context.veeFields[ref] &&
-    //     (context.veeFields[ref].dirty || context.veeFields[ref].validated)
-    //   ) {
-    //     return !context.veeErrors.has(ref);
-    //   }
-    //   return null;
-    // }
-
-    const setProductImages = () => {
-      const images = props.product.images;
-      images.forEach((image) => {
+    const getThumbnailsFromProductImages = (product) => {
+      return product.images.map((image) => {
         productImageThumbnails.value.push({
           name: image.fileName,
           src: `http://localhost:3000/${image.path}`,
@@ -208,30 +186,26 @@ export default {
     const removeImage = (image) => {
       if (isBase64(image)) {
         imagesToUpload.value = imagesToUpload.value.filter((file) => {
-          return file.name != image.name;
+          return file.name !== image.name;
         });
-        productImageThumbnails.value = productImageThumbnails.value.filter(
-          (file) => {
-            return file.name != image.name;
-          }
-        );
+        updateImageThumbnails(image);
       } else {
-        productImageThumbnails.value = productImageThumbnails.value.filter(
-          (file) => {
-            return file.name != image.name;
-          }
-        );
+        updateImageThumbnails(image);
         imagesToDelete.value.push(image.name);
       }
     };
 
-    const isBase64 = (image) => {
-      return image.src.indexOf("base64") > -1;
+    const updateImageThumbnails = (image) => {
+      productImageThumbnails.value = productImageThumbnails.value.filter(
+        (file) => {
+          return file.name != image.name;
+        }
+      );
     };
 
+    getThumbnailsFromProductImages(props.product);
     onMounted(() => {
       fetchCategories();
-      setProductImages();
     });
 
     return {
@@ -245,7 +219,6 @@ export default {
       refreshView,
       goBack,
       removeImage,
-      // validateForm,
       onImagesSelect,
     };
   },

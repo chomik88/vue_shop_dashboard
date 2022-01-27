@@ -16,19 +16,8 @@ Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
 Vue.use(Vuex);
 
-const store = new Vuex.Store({
-  // state: {
-  //   refreshNeeded: false,
-  // },
-  // mutations: {
-  //   triggerRefresh(state) {
-  //     state.refreshNeeded = !state.refreshNeeded;
-  //   },
-  // },
-});
 
 new Vue({
   router,
-  store,
   render: (h) => h(App),
 }).$mount("#app");
