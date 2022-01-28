@@ -4,7 +4,7 @@
       <b-button @click="goBack()">Go back</b-button>
     </b-col>
     <b-col md="4" class="text-start">
-      <b-img fluid :src="mainImage" alt="" v-if="mainImage"></b-img>
+      <b-img fluid :src="mainImage.src ? mainImage.src : form.mainImage" alt=""></b-img>
       <b-form>
         <b-form-group label="Add product images">
           <b-form-file id="images" @change="onImagesSelect" multiple>
@@ -14,7 +14,6 @@
     </b-col>
     <b-col class="text-start" md="8">
       <h2>{{ product.name }}</h2>
-      <!-- <b-form @submit.prevent="validateForm(id)"> -->
       <b-form @submit.prevent="id ? editProduct() : addProduct()">
         <b-form-group label="Product name" label-for="input-name">
           <b-form-input
@@ -48,7 +47,7 @@
         <b-button type="submit" variant="primary" class="mt-4">Submit</b-button>
       </b-form>
     </b-col>
-    <b-col>
+    <b-col class="mt-4">
       <b-row v-if="productImageThumbnails.length > 0">
         <b-col
           md="4"
@@ -70,10 +69,11 @@
               ></b-icon-trash-fill>
               <b-form-checkbox
                 :id="thumbnail.name"
-                v-model="mainImage"
+                v-model="mainImage.src"
                 name="main-image"
                 :value="thumbnail.src"
                 class="main-image-checkbox"
+                @change="showThumbnail($event, thumbnail)"
               >
                 Main image?
               </b-form-checkbox>
@@ -85,13 +85,13 @@
     </b-col>
     <pre>
               {{ form }}
-              {{ imagesToUpload }}
           </pre
     >
   </b-row>
 </template>
 <script>
 import axios from "axios";
+import _ from "lodash";
 import { ref, reactive, onMounted } from "@vue/composition-api";
 
 const isBase64 = (image) => {
@@ -112,9 +112,14 @@ export default {
       category: props.product.category,
       servedImages: props.product.images,
     });
-    const mainImage = ref(null);
+    const mainImage = reactive({
+      src: props.product.mainImage,
+      name: "",
+    });
     const imagesToUpload = ref([]);
     const productImageThumbnails = ref([]);
+    const dataTransfer = new DataTransfer();
+
     const addProduct = () => {
       defineFormData();
       axios
@@ -148,7 +153,11 @@ export default {
       formData.append("name", form.name);
       formData.append("description", form.description);
       formData.append("category", form.category);
-      formData.append("mainImage", mainImage.value);
+      if (mainImage.src && isBase64(mainImage)) {
+        formData.append("mainImage", mainImage.name);
+      } else {
+        formData.append("mainImage", mainImage.src);
+      }
       formData.append("servedImages", JSON.stringify(form.servedImages));
       for (let i = 0; i < imagesToUpload.value.length; i++) {
         formData.append(
@@ -160,17 +169,30 @@ export default {
       return formData;
     };
 
+    const showThumbnail = (e, image) => {
+      mainImage.name = image.name;
+    };
+
     const onImagesSelect = (event) => {
-      imagesToUpload.value = [...Array.from(event.target.files)];
-      console.log(imagesToUpload.value);
+      for (let i = 0; i < event.target.files.length; i++) {
+        dataTransfer.items.add(event.target.files[i]);
+      }
+      event.target.files = dataTransfer.files;
+      imagesToUpload.value = Array.from(event.target.files);
       imagesToUpload.value.forEach((file) => {
-        console.log(file);
         const fileReader = new FileReader();
         fileReader.addEventListener("load", function (e) {
-          productImageThumbnails.value.push({
-            name: file.name,
-            src: e.target.result,
-          });
+          if (
+            _.findIndex(productImageThumbnails.value, {
+              name: file.name,
+              src: e.target.result,
+            }) === -1
+          ) {
+            productImageThumbnails.value.push({
+              name: file.name,
+              src: e.target.result,
+            });
+          }
         });
 
         fileReader.readAsDataURL(file);
@@ -188,16 +210,21 @@ export default {
 
     const removeImage = (image) => {
       if (isBase64(image)) {
+        for (let i = 0; i < dataTransfer.items.length; i++) {
+          if (dataTransfer.files[i].name === image.name) {
+            dataTransfer.items.remove(dataTransfer.files[i]);
+          }
+        }
         imagesToUpload.value = imagesToUpload.value.filter((file) => {
           return file.name !== image.name;
         });
+
         updateImageThumbnails(image);
       } else {
         updateImageThumbnails(image);
         form.servedImages = form.servedImages.filter((item) => {
           return item.fileName !== image.name;
         });
-        console.log(form.servedImages);
       }
     };
 
@@ -220,13 +247,14 @@ export default {
       productImageThumbnails,
       id,
       mainImage,
+      imagesToUpload,
       addProduct,
       editProduct,
       refreshView,
       goBack,
       removeImage,
       onImagesSelect,
-      imagesToUpload,
+      showThumbnail,
     };
   },
 };
