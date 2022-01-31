@@ -29,8 +29,11 @@
       >
         {{ selectedAttribute }}
         <TagsSelect
-          :tagValues="selectedAttribute.attributeValues"
+          :allAttributes="attributes"
+          :attribute="selectedAttribute"
           componentType="select"
+          ref="editAttributeValues"
+          @removeAttribute="removeAttribute($event)"
         />
       </b-form-group>
     </b-form>
@@ -44,7 +47,8 @@ export default {
   components: {
     TagsSelect,
   },
-  setup() {
+  props: ["definedAttributes"],
+  setup(props) {
     const attributes = ref([]);
     const currentSelectedAttribute = ref(null);
     const selectedAttributes = ref([]);
@@ -58,6 +62,7 @@ export default {
         })
         .catch((error) => console.error(error.message))
         .finally(() => {
+          selectedAttributes.value = props.definedAttributes || [];
           isLoading.value = false;
         });
     };
@@ -73,11 +78,28 @@ export default {
       currentSelectedAttribute.value = null;
     };
     const availableOptions = computed(() => {
-      const result = attributes.value.filter((attribute) => {
-        return selectedAttributes.value.indexOf(attribute) === -1;
-      });
-      return result;
+      if (selectedAttributes.value && selectedAttributes.value.length > 0) {
+        const selectedAttributesIds = selectedAttributes.value.map(
+          (item) => item.attributeId
+        );
+        const result = attributes.value.filter((attribute) => {
+          return selectedAttributesIds.indexOf(attribute._id) === -1;
+        });
+        return result;
+      } else {
+        return attributes.value;
+      }
     });
+
+    const removeAttribute = (idToRemove) => {
+      selectedAttributes.value = selectedAttributes.value.filter(
+        (item) => item._id != idToRemove
+      );
+      selectedAttributes.value = selectedAttributes.value.filter(
+        (item) => item.attributeId != idToRemove
+      );
+    };
+
     fetchAttributes();
     return {
       attributes,
@@ -87,6 +109,7 @@ export default {
       currentSelectedAttribute,
       selectAttribute,
       addAttribute,
+      removeAttribute,
     };
   },
 };

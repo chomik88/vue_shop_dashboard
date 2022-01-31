@@ -40,8 +40,7 @@
       </b-form-tags>
     </b-form-group>
     <b-form-group label="Attribute values" class="mt-3" v-else>
-      {{ tagValues }}
-      <b-form-tags v-model="usedValues" no-outer-focus>
+      <b-form-tags v-model="selectTagState.usedValues" no-outer-focus>
         <template
           v-slot="{
             tags,
@@ -52,18 +51,27 @@
             tagVariant,
           }"
         >
-          <div class="d-flex mt-4 attribute-select-wrapper">
-            <b-form-select
-              v-bind="inputAttrs"
-              v-on="inputHandlers"
-              :disabled="availableOptions.length === 0"
-              :options="availableOptions"
+          <div
+            class="d-flex mt-4 attribute-select-wrapper justify-content-between"
+          >
+            <div class="left-col">
+              <b-form-select
+                v-bind="inputAttrs"
+                v-on="inputHandlers"
+                :disabled="availableOptions.length === 0"
+                :options="availableOptions"
+              >
+                <template #first>
+                  <option disabled value="">Choose a tag...</option>
+                </template>
+              </b-form-select>
+              <b-button variant="primary" @click="addTag">Add</b-button>
+            </div>
+            <b-button
+              variant="danger"
+              @click="onRemoveAttribute(selectTagState.id)"
+              >Remove</b-button
             >
-              <template #first>
-                <option disabled value="">Choose a tag...</option>
-              </template>
-            </b-form-select>
-            <b-button variant="primary" @click="addTag">Add</b-button>
           </div>
           <div class="tags-wrapper">
             <b-form-tag
@@ -80,22 +88,39 @@
       </b-form-tags>
     </b-form-group>
     {{ value }}
+    {{ selectTagState }}
   </div>
 </template>
 <script>
-import { ref, computed, watch } from "@vue/composition-api";
+import { ref, computed, watch, reactive } from "@vue/composition-api";
 export default {
-  props: ["tagValues", "componentType"],
+  props: ["attribute", "componentType", "allAttributes"],
   setup(props, context) {
     const value = ref([]);
-    const usedValues = ref([]);
-    props.tagValues ? (value.value = props.tagValues) : (value.value = []);
-    const availableOptions = computed(() => {
-      const result = props.tagValues.filter((tagValue) => {
-        return usedValues.value.indexOf(tagValue) === -1;
-      });
-      return result;
+    const selectTagState = reactive({
+      id: props.attribute._id || props.attribute.attributeId,
+      name: props.attribute.name,
+      usedValues: props.attribute.attributeValues,
     });
+    props.attribute
+      ? (value.value = props.attribute.attributeValues)
+      : (value.value = []);
+    const availableOptions = computed(() => {
+      const filteredAttribute = props.allAttributes.filter((item) => {
+        return item._id === selectTagState.id;
+      });
+      if (filteredAttribute.length > 0) {
+        return filteredAttribute[0].attributeValues.filter((tagValue) => {
+          return selectTagState.usedValues.indexOf(tagValue) === -1;
+        });
+      } else {
+        return (selectTagState.usedValues = []);
+      }
+    });
+
+    const onRemoveAttribute = (id) => {
+      context.emit("removeAttribute", id);
+    };
 
     watch(value, (tags) => {
       context.emit("updateTags", tags);
@@ -103,8 +128,9 @@ export default {
 
     return {
       value,
-      usedValues,
+      selectTagState,
       availableOptions,
+      onRemoveAttribute,
     };
   },
 };

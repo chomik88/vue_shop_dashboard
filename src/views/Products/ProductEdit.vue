@@ -8,7 +8,7 @@
     <div v-if="product">
       <h1 class="mb-5">Edit product</h1>
       <b-form v-if="!isLoading" class="text-start">
-        <b-button @click="send()">SEND</b-button>
+        <b-button @click="editProduct()">Submit</b-button>
         <b-tabs>
           <b-tab title="Product main features">
             <ProductAddEditForm
@@ -19,7 +19,10 @@
             />
           </b-tab>
           <b-tab title="Product attributes">
-            <ProductAttributesEditForm ref="editAttributes"/>
+            <ProductAttributesEditForm
+              ref="editAttributes"
+              :definedAttributes="product.attributes"
+            />
           </b-tab>
         </b-tabs>
       </b-form>
@@ -49,6 +52,7 @@ export default {
     const isLoading = ref(false);
     const editForm = ref(null);
     const editAttributes = ref(null);
+    const updatedProduct = ref(null);
 
     const fetchProduct = () => {
       isLoading.value = true;
@@ -61,7 +65,6 @@ export default {
           console.error(error.message);
         })
         .finally(() => {
-          console.log(product.value);
           isLoading.value = false;
         });
     };
@@ -70,9 +73,31 @@ export default {
       router.push("/products");
     };
 
-    const send = () => {
-      console.log(editForm.value.form);
-      console.log(editAttributes.value.selectedAttributes);
+    const editProduct = () => {
+      const editAttributesComponents =
+        editAttributes.value.$refs.editAttributeValues;
+      const updatedAttributes = [];
+      editAttributesComponents.map((item) => {
+        if (!item.selectTagState.id) {
+          return;
+        }
+        return updatedAttributes.push({
+          attributeId: item.selectTagState.id,
+          attributeValues: item.selectTagState.usedValues,
+        });
+      });
+      updatedProduct.value = {
+        ...product.value,
+        ...editForm.value.form,
+        attributes: updatedAttributes,
+      };
+
+      axios
+        .patch("http://localhost:3000/products/" + id, updatedProduct.value)
+        .then(() => {
+          console.log("Update request");
+        })
+        .catch((error) => console.error(error));
     };
 
     fetchProduct();
@@ -83,7 +108,7 @@ export default {
       goBack,
       editForm,
       editAttributes,
-      send,
+      editProduct,
     };
   },
 };
