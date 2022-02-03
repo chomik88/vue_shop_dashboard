@@ -17,8 +17,8 @@
         :fields="tableFields"
         v-if="products.length > 0"
       >
-        <template #cell(thumbnail)="data">
-          <b-img :src="data.value"></b-img>
+        <template #cell(mainImage)="data">
+          <b-img :src="data.value" v-if="data.value != 'undefined'"></b-img>
         </template>
         <template #cell(actions)="row">
           <div class="buttons-wrapper">
@@ -59,7 +59,7 @@ export default {
   },
   setup(props, context) {
     const router = context.root.$router;
-    const tableFields = ["name", "thumbnail", "actions"];
+    const tableFields = ["name", "mainImage", "actions"];
     const products = ref([]);
     const currentItem = ref(null);
     const modalVisible = ref(false);
