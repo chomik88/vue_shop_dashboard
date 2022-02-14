@@ -79,9 +79,11 @@ export default {
     };
     const availableOptions = computed(() => {
       if (selectedAttributes.value && selectedAttributes.value.length > 0) {
-        const selectedAttributesIds = selectedAttributes.value.map(
-          (item) => item.attributeId
-        );
+        const selectedAttributesIds = selectedAttributes.value.map((item) => {
+          console.log(item);
+          console.log(item._id);
+          return item._id;
+        });
         const result = attributes.value.filter((attribute) => {
           return selectedAttributesIds.indexOf(attribute._id) === -1;
         });
@@ -94,9 +96,6 @@ export default {
     const removeAttribute = (idToRemove) => {
       selectedAttributes.value = selectedAttributes.value.filter(
         (item) => item._id != idToRemove
-      );
-      selectedAttributes.value = selectedAttributes.value.filter(
-        (item) => item.attributeId != idToRemove
       );
     };
 

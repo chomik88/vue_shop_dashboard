@@ -20,7 +20,9 @@
         <template #cell(attributeValues)="row">
           <template v-for="(value, index) in row.item.attributeValues">
             {{ value
-            }}<span v-if="index + 1 < row.item.attributeValues.length" :key="value"
+            }}<span
+              v-if="index + 1 < row.item.attributeValues.length"
+              :key="value"
               >,</span
             >
           </template>
@@ -70,8 +72,7 @@ export default {
       axios
         .get("http://localhost:3000/attributes")
         .then((response) => {
-          console.log(response.data)
-          return attributes.value = response.data;
+          attributes.value = response.data;
         })
         .catch((error) => console.error(error.message))
         .finally(() => (isLoading.value = false));

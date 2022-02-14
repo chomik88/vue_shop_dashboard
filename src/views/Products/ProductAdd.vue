@@ -50,7 +50,7 @@ export default {
           return;
         }
         return updatedAttributes.push({
-          attributeId: item.selectTagState.id,
+          _id: item.selectTagState.id,
           attributeValues: item.selectTagState.usedValues,
         });
       });

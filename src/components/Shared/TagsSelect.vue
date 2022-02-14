@@ -98,7 +98,7 @@ export default {
   setup(props, context) {
     const value = ref([]);
     const selectTagState = reactive({
-      id: props.attribute._id || props.attribute.attributeId,
+      id: props.attribute._id,
       name: props.attribute.name,
       usedValues: props.attribute.attributeValues,
     });
