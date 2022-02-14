@@ -59,7 +59,7 @@ export default {
       axios
         .get("http://localhost:3000/products/" + id)
         .then((response) => {
-          return (product.value = response.data);
+          product.value = response.data;
         })
         .catch((error) => {
           console.error(error.message);
