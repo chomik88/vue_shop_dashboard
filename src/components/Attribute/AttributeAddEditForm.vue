@@ -10,86 +10,86 @@
           placeholder="Enter attribute name"
         ></b-form-input>
       </b-form-group>
-      <b-form-group label="Attribute values" class="mt-3">
-        <b-form-tags v-model="form.values" no-outer-focus>
-          <template
-            v-slot="{
-              tags,
-              inputAttrs,
-              inputHandlers,
-              addTag,
-              removeTag,
-              tagVariant,
-            }"
-          >
-            <b-input-group>
-              <b-form-input
-                v-bind="inputAttrs"
-                v-on="inputHandlers"
-              ></b-form-input>
-              <b-input-group-append>
-                <b-button variant="primary" @click="addTag">Add</b-button>
-              </b-input-group-append>
-            </b-input-group>
-            <div class="tags-wrapper">
-              <b-form-tag
-                v-for="tag in tags"
-                :key="JSON.parse(tag).id"
-                :title="JSON.parse(tag).value"
-                @remove="removeTag(tag)"
-                :variant="tagVariant"
-              >
-                {{ JSON.parse(tag).value }}
-              </b-form-tag>
-            </div>
-          </template>
-        </b-form-tags>
-      </b-form-group>
+      <TagsSelect
+        :tagValues="form.values"
+        @updateTags="updateFormTags"
+        componentType="add"
+      />
       <b-button type="submit" variant="primary" class="mt-4">Submit</b-button>
     </b-form>
+    <pre>
+      {{ form }}
+    </pre>
   </div>
 </template>
 <script>
 import axios from "axios";
-import { reactive, watch } from "@vue/composition-api";
+import { reactive, ref } from "@vue/composition-api";
+import TagsSelect from "@/components/Shared/TagsSelect";
 export default {
   props: ["attribute"],
+  components: {
+    TagsSelect,
+  },
   setup(props, context) {
     const route = context.root.$route;
     const router = context.root.$router;
     const id = route.params.id;
-    console.log(props.attribute);
+    const newAttributeValues = ref([]);
+    const deletedAttributeValues = ref([]);
     const form = reactive({
       name: props.attribute.name,
       values: props.attribute.values,
     });
 
-    console.log(form);
-
     const addAttribute = () => {
       axios
-        .post("http://localhost:3000/attributes/", form)
-        .then(router.push({ path: "/attributes" }))
+        .post("http://localhost:3000/attributes/", {
+          name: form.name,
+          values: form.values,
+        })
+        .then((response) => {
+         console.log(response)
+        })
         .catch((error) => console.error(error));
+    };
+
+    const addAttributeValues = (id, values) => {
+      values.map((value) => {
+        if (deletedAttributeValues.value.indexOf(value) > -1) {
+          values.splice(value, 1);
+        }
+      });
+      values.map((value) => {
+        axios
+          .post("http://localhost:3000/attribute-values/", {
+            attributeId: id,
+            value: value,
+          })
+          .catch((error) => console.error(error));
+      });
     };
 
     const editAttribute = () => {
       axios
         .patch("http://localhost:3000/attributes/" + id, form)
-        .then((response) => console.log(response))
-        .catch((error) => console.error(error));
+        .then((response) => {
+          addAttributeValues(response.data._id, newAttributeValues.value);
+        })
+        .catch((error) => console.error(error))
+        .finally(() => router.push({ path: "/attributes" }));
     };
 
-    watch(() => [...form.values], (newValue, oldValue) => {
-      console.log(newValue, oldValue)
-      // const new
-    })
+    const updateFormTags = (e) => {
+      form.values = e;
+    };
 
     return {
       form,
       id,
       addAttribute,
       editAttribute,
+      updateFormTags,
     };
   },
 };

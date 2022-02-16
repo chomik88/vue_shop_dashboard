@@ -1,10 +1,7 @@
 <template>
   <b-row>
-    <b-col md="12" class="text-start mb-4">
-      <b-button @click="goBack()">Go back</b-button>
-    </b-col>
     <b-col md="4" class="text-start">
-      <b-img fluid :src="mainImage.src ? mainImage.src : form.mainImage" alt=""></b-img>
+      <b-img fluid :src="mainImage.src ? mainImagePath : form.mainImage" alt=""></b-img>
       <b-form>
         <b-form-group label="Add product images">
           <b-form-file id="images" @change="onImagesSelect" multiple>
@@ -14,66 +11,64 @@
     </b-col>
     <b-col class="text-start" md="8">
       <h2>{{ product.name }}</h2>
-      <b-form @submit.prevent="id ? editProduct() : addProduct()">
-        <b-form-group label="Product name" label-for="input-name">
-          <b-form-input
+      <b-form-group label="Product name" label-for="input-name">
+        <b-form-input
             id="input-name"
             v-model="form.name"
             type="text"
             placeholder="Enter product name"
-          ></b-form-input>
-        </b-form-group>
-        <b-form-group
+        ></b-form-input>
+      </b-form-group>
+      <b-form-group
           label="Product description"
           label-for="textarea-description"
           class="mt-3"
-        >
-          <b-form-textarea
+      >
+        <b-form-textarea
             id="textarea-description"
             v-model="form.description"
             placeholder="Enter product description"
-          ></b-form-textarea>
-        </b-form-group>
-        <b-form-group label="Product categories">
-          <b-form-checkbox-group v-model="form.category">
-            <b-form-checkbox
+        ></b-form-textarea>
+      </b-form-group>
+      <b-form-group label="Product categories">
+        <b-form-checkbox-group v-model="form.category">
+          <b-form-checkbox
               v-for="category in categories"
               :key="category._id"
               :value="category._id"
-              >{{ category.name }}</b-form-checkbox
-            >
-          </b-form-checkbox-group>
-        </b-form-group>
-        <b-button type="submit" variant="primary" class="mt-4">Submit</b-button>
-      </b-form>
+          >{{ category.name }}
+          </b-form-checkbox
+          >
+        </b-form-checkbox-group>
+      </b-form-group>
     </b-col>
     <b-col class="mt-4">
       <b-row v-if="productImageThumbnails.length > 0">
         <b-col
-          md="4"
-          v-for="(thumbnail, index) in productImageThumbnails"
-          :key="index"
+            md="4"
+            v-for="(thumbnail, index) in productImageThumbnails"
+            :key="index"
         >
           <div class="img-item rounded">
             <b-img
-              rounded
-              alt="Rounded image"
-              fluid
-              :src="thumbnail.src"
+                rounded
+                alt="Rounded image"
+                fluid
+                :src="thumbnail.src"
             ></b-img>
             <div class="img-overlay rounded">
               <b-icon-trash-fill
-                variant="warning"
-                font-scale="2"
-                @click="removeImage(thumbnail)"
+                  variant="warning"
+                  font-scale="2"
+                  @click="removeImage(thumbnail)"
               ></b-icon-trash-fill>
               <b-form-checkbox
-                :id="thumbnail.name"
-                v-model="mainImage.src"
-                name="main-image"
-                :value="thumbnail.src"
-                class="main-image-checkbox"
-                @change="showThumbnail($event, thumbnail)"
+                  :id="thumbnail.name"
+                  v-model="mainImage.src"
+                  name="main-image"
+                  :value="thumbnail.src"
+                  class="main-image-checkbox"
+                  @change="showThumbnail($event, thumbnail)"
               >
                 Main image?
               </b-form-checkbox>
@@ -86,20 +81,23 @@
     <pre>
               {{ form }}
           </pre
-    >
+          >
+    {{ formSended }}
+    {{ mainImage }}
+    {{ product.mainImage }}
   </b-row>
 </template>
 <script>
 import axios from "axios";
 import _ from "lodash";
-import { ref, reactive, onMounted } from "@vue/composition-api";
+import {ref, reactive, onMounted, watch, computed} from "@vue/composition-api";
 
 const isBase64 = (image) => {
   return image.src.indexOf("base64") > -1;
 };
 
 export default {
-  props: ["product"],
+  props: ["product", "formSended"],
   setup(props, context) {
     const router = context.root.$router;
     const route = context.root.$route;
@@ -120,22 +118,6 @@ export default {
     const productImageThumbnails = ref([]);
     const dataTransfer = new DataTransfer();
 
-    const addProduct = () => {
-      defineFormData();
-      axios
-        .post("http://localhost:3000/products", defineFormData())
-        .then(() => router.push({ path: "/products" }))
-        .catch((error) => console.error(error));
-    };
-    const editProduct = () => {
-      defineFormData();
-      axios
-        .patch("http://localhost:3000/products/" + id, defineFormData())
-        .then(() => {
-          refreshView();
-        })
-        .catch((error) => console.error(error));
-    };
     const fetchCategories = () => {
       axios.get("http://localhost:3000/categories").then((response) => {
         categories.value = response.data;
@@ -161,9 +143,9 @@ export default {
       formData.append("servedImages", JSON.stringify(form.servedImages));
       for (let i = 0; i < imagesToUpload.value.length; i++) {
         formData.append(
-          "images",
-          imagesToUpload.value[i],
-          imagesToUpload.value[i].name
+            "images",
+            imagesToUpload.value[i],
+            imagesToUpload.value[i].name
         );
       }
       return formData;
@@ -183,10 +165,10 @@ export default {
         const fileReader = new FileReader();
         fileReader.addEventListener("load", function (e) {
           if (
-            _.findIndex(productImageThumbnails.value, {
-              name: file.name,
-              src: e.target.result,
-            }) === -1
+              _.findIndex(productImageThumbnails.value, {
+                name: file.name,
+                src: e.target.result,
+              }) === -1
           ) {
             productImageThumbnails.value.push({
               name: file.name,
@@ -200,12 +182,14 @@ export default {
     };
 
     const getThumbnailsFromProductImages = (product) => {
-      return product.images.map((image) => {
-        productImageThumbnails.value.push({
-          name: image.fileName,
-          src: `http://localhost:3000/${image.path}`,
+      if (product.images) {
+        return product.images.map((image) => {
+          productImageThumbnails.value.push({
+            name: image.fileName,
+            src: `http://localhost:3000/${image.path}`,
+          });
         });
-      });
+      }
     };
 
     const removeImage = (image) => {
@@ -230,13 +214,24 @@ export default {
 
     const updateImageThumbnails = (image) => {
       productImageThumbnails.value = productImageThumbnails.value.filter(
-        (file) => {
-          return file.name != image.name;
-        }
+          (file) => {
+            return file.name != image.name;
+          }
       );
     };
 
+    const mainImagePath = computed(() => {
+      return mainImage.src.indexOf('http://') === -1 && !isBase64(mainImage) ? 'http://localhost:3000/' + mainImage.src : mainImage.src
+    })
+
     getThumbnailsFromProductImages(props.product);
+
+    watch(() => props.formSended, (newValue) => {
+      if (newValue) {
+        context.emit("productFormDataCreated", defineFormData());
+      }
+    })
+
     onMounted(() => {
       fetchCategories();
     });
@@ -248,8 +243,7 @@ export default {
       id,
       mainImage,
       imagesToUpload,
-      addProduct,
-      editProduct,
+      mainImagePath,
       refreshView,
       goBack,
       removeImage,
@@ -269,6 +263,7 @@ export default {
 .img-item {
   position: relative;
   margin-bottom: 12px;
+
   .img-overlay {
     opacity: 0;
     position: absolute;
