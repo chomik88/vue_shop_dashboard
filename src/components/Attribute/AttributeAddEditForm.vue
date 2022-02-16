@@ -46,9 +46,10 @@ export default {
       axios
         .post("http://localhost:3000/attributes/", {
           name: form.name,
+          values: form.values,
         })
         .then((response) => {
-          addAttributeValues(response.data._id, form.values);
+         console.log(response)
         })
         .catch((error) => console.error(error));
     };

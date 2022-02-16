@@ -1,27 +1,34 @@
 <template>
   <div>
-    <h1 class="mb-5">Add new product</h1>
     <b-row>
       <b-col md="12" class="text-start mb-4">
         <b-button @click="goBack()">Go back</b-button>
       </b-col>
     </b-row>
-    <b-button @click="addProduct()">Submit</b-button>
-    <b-tabs class="text-start">
-      <b-tab title="Product main features">
-        <ProductAddEditForm :product="product" class="mt-4" ref="editForm" />
-      </b-tab>
-      <b-tab title="Product attributes">
-        <ProductAttributesEditForm ref="editAttributes" />
-      </b-tab>
-    </b-tabs>
+    <div>
+      <h1 class="mb-5">Add new product</h1>
+      <b-form class="text-start">
+        <b-button @click="onProductFormSubmit()" class="mb-4">Submit</b-button>
+        <b-tabs class="text-start">
+          <b-tab title="Product main features">
+            <ProductAddEditForm :product="product" :formSended="formSended" class="mt-4"
+                                @productFormDataCreated="addProductFormData"/>
+          </b-tab>
+          <b-tab title="Product attributes">
+            <ProductAttributesEditForm :formSended="formSended"
+                                       @productAttributesCreated="addProductAttributes"/>
+          </b-tab>
+        </b-tabs>
+      </b-form>
+    </div>
   </div>
 </template>
 <script>
 import axios from "axios";
 import ProductAddEditForm from "@/components/Product/ProductAddEditForm";
 import ProductAttributesEditForm from "../../components/Product/ProductAttributesEditForm.vue";
-import { ref } from "@vue/composition-api";
+import {ref} from "@vue/composition-api";
+
 export default {
   components: {
     ProductAddEditForm,
@@ -34,43 +41,39 @@ export default {
       description: "",
       thumbnail: "",
     });
-    const editForm = ref(null);
-    const editAttributes = ref(null);
+    const formData = ref(null);
+    const formSended = ref(false)
 
     const goBack = () => {
       router.push("/products");
     };
 
-    const addProduct = () => {
-      const editAttributesComponents =
-        editAttributes.value.$refs.editAttributeValues;
-      const updatedAttributes = [];
-      editAttributesComponents.map((item) => {
-        if (!item.selectTagState.id) {
-          return;
-        }
-        return updatedAttributes.push({
-          _id: item.selectTagState.id,
-          attributeValues: item.selectTagState.usedValues,
-        });
-      });
-      product.value = {
-        ...product.value,
-        ...editForm.value.form,
-        attributes: updatedAttributes,
-      };
-
+    const addProduct = (data) => {
       axios
-        .post("http://localhost:3000/products", product.value)
-        .then(() => router.push({ path: "/products" }))
-        .catch((error) => console.error(error));
+          .post("http://localhost:3000/products", data)
+          .then(() => router.push({path: "/products"}))
+          .catch((error) => console.error(error));
     };
+
+    const onProductFormSubmit = () => {
+      formSended.value = true;
+    }
+    const addProductFormData = (e) => {
+      formData.value = e;
+    }
+
+    const addProductAttributes = (e) => {
+      formData.value.append('attributes', JSON.stringify(e))
+      addProduct(formData.value)
+    }
     return {
       product,
-      editForm,
-      editAttributes,
+      formSended,
       goBack,
       addProduct,
+      onProductFormSubmit,
+      addProductFormData,
+      addProductAttributes
     };
   },
 };

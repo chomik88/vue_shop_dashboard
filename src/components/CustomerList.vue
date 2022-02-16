@@ -1,15 +1,15 @@
 <template>
   <div>
     <b-table
-      striped
-      bordered
-      borderless
-      small
-      hover
-      :items="customers"
-      :fields="tableFields"
-      v-if="customers.length > 0"
-      class="mt-4"
+        striped
+        bordered
+        borderless
+        small
+        hover
+        :items="customers"
+        :fields="tableFields"
+        v-if="customers.length > 0"
+        class="mt-4"
     >
       <template #cell(fullName)="row">
         {{ row.item.firstName }} {{ row.item.lastName }}
@@ -17,10 +17,11 @@
       <template #cell(actions)="row">
         <div class="buttons-wrapper">
           <b-button
-            variant="primary"
-            router-tag="button"
-            @click="showCustomerDetails(row.item._id)"
-            >Show details</b-button
+              variant="primary"
+              router-tag="button"
+              @click="showCustomerDetails(row.item._id)"
+          >Show details
+          </b-button
           >
         </div>
       </template>
@@ -30,7 +31,8 @@
 </template>
 <script>
 import axios from "axios";
-import { ref, onMounted } from "@vue/composition-api";
+import {ref, onMounted} from "@vue/composition-api";
+
 export default {
   setup(props, context) {
     const router = context.root.$router;
@@ -43,7 +45,7 @@ export default {
       });
     };
     const showCustomerDetails = (id) => {
-      router.push({ path: `customer/${id}` });
+      router.push({path: `customer/${id}`});
     };
     // const populateDb = () => {
     //   const customers = [
@@ -152,16 +154,19 @@ export default {
     //       },
     //     },
     //   ];
-
+    //
     //   customers.forEach((item) => {
     //     axios
-    //       .post("http://localhost:3000/customers", item)
-    //       .then(() => console.log("Customers added"))
-    //       .catch((error) => console.error(error));
+    //         .post("http://localhost:3000/customers", item)
+    //         .then(() => console.log("Customers added"))
+    //         .catch((error) => console.error(error));
     //   });
     // };
     onMounted(fetchCustomers);
-    // onMounted(fetchCustomers, populateDb)
+    // onMounted(() => {
+    //   fetchCustomers()
+    //   populateDb()
+    // })
     return {
       tableFields,
       customers,
